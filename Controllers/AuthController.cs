@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using JwtAuthWebApi.Core.Constants;
 using JwtAuthWebApi.Core.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -125,5 +126,39 @@ public class AuthController : ControllerBase
         var tokenHandler = new JwtSecurityTokenHandler();
 
         return tokenHandler.WriteToken(token);
+    }
+
+    // Make user an admin
+    [Authorize]
+    [HttpPost]
+    [Route("make-admin")]
+    public async Task<IActionResult> MakeAdmin([FromBody] UpdatePermissionDto updatePermissionDto)
+    {
+        var user = await _userManager.FindByNameAsync(updatePermissionDto.UserName);
+        if (user == null)
+        {
+            return NotFound("User Not Found");
+        }
+
+        await _userManager.AddToRoleAsync(user, UserRoles.ADMIN);
+
+        return Ok("User is now an Admin");
+    }
+
+    // Make user an owner
+    [Authorize]
+    [HttpPost]
+    [Route("make-owner")]
+    public async Task<IActionResult> MakeOwner([FromBody] UpdatePermissionDto updatePermissionDto)
+    {
+        var user = await _userManager.FindByNameAsync(updatePermissionDto.UserName);
+        if (user == null)
+        {
+            return NotFound("User Not Found");
+        }
+
+        await _userManager.AddToRoleAsync(user, UserRoles.OWNER);
+
+        return Ok("User is now an Owner");
     }
 }
