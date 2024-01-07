@@ -1,3 +1,5 @@
+using JwtAuthWebApi.Core.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JwtAuthWebApi.Controllers;
@@ -21,6 +23,31 @@ public class WeatherForecastController : ControllerBase
     [HttpGet]
     [Route("Get")]
     public IActionResult Get()
+    {
+        return Ok(Summaries);
+    }
+
+
+    [HttpGet]
+    [Route("GetUsersRole")]
+    [Authorize(Roles = UserRoles.USER)]
+    public IActionResult GetUsersRole()
+    {
+        return Ok(Summaries);
+    }
+
+    [HttpGet]
+    [Route("GetAdminRole")]
+    [Authorize(Roles = UserRoles.ADMIN)]
+    public IActionResult GetAdminRole()
+    {
+        return Ok(Summaries);
+    }
+
+    [HttpGet]
+    [Route("GetOwnerRole")]
+    [Authorize(Roles = UserRoles.OWNER)]
+    public IActionResult GetOwnerRole()
     {
         return Ok(Summaries);
     }
