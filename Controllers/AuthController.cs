@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using JwtAuthWebApi.Core.Constants;
 using JwtAuthWebApi.Core.DTOs;
+using JwtAuthWebApi.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,10 @@ namespace JwtAuthWebApi.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
-    public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+    public AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
     {
         _roleManager = roleManager;
         _userManager = userManager;
@@ -55,9 +56,11 @@ public class AuthController : ControllerBase
             return StatusCode(StatusCodes.Status409Conflict, "User already exists!");
         }
 
-        IdentityUser user = new()
+        ApplicationUser user = new()
         {
             UserName = registerDto.UserName,
+            FirstName = registerDto.FirstName,
+            LastName = registerDto.LastName,
             Email = registerDto.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
 
@@ -96,7 +99,7 @@ public class AuthController : ControllerBase
         return Ok(token);
     }
 
-    private async Task<string> CreateJsonWebToken(IdentityUser user)
+    private async Task<string> CreateJsonWebToken(ApplicationUser user)
     {
         var roles = await _userManager.GetRolesAsync(user);
 
@@ -105,6 +108,8 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim(ClaimTypes.NameIdentifier, user.Id!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("FirstName", user.FirstName!),
+            new Claim("LastName", user.LastName!),
         };
 
         foreach (var role in roles)
